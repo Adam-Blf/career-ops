@@ -1,5 +1,9 @@
 # Career-Ops
 
+<!-- adam-badges:start -->
+[![commits](https://img.shields.io/github/commit-activity/t/Adam-Blf/career-ops?color=001329&label=commits&style=flat-square)](https://github.com/Adam-Blf/career-ops/commits) [![visites](https://hits.sh/github.com/Adam-Blf/career-ops.svg?style=flat-square&label=visites&color=001329)](https://hits.sh/github.com/Adam-Blf/career-ops/) [![last commit](https://img.shields.io/github/last-commit/Adam-Blf/career-ops?color=D4A437&style=flat-square&label=dernier%20push)](https://github.com/Adam-Blf/career-ops/commits) [![top language](https://img.shields.io/github/languages/top/Adam-Blf/career-ops?style=flat-square)](https://github.com/Adam-Blf/career-ops) [![license](https://img.shields.io/github/license/Adam-Blf/career-ops?style=flat-square&color=D4A437)](LICENSE)
+<!-- adam-badges:end -->
+
 [English](README.md) | [Español](README.es.md) | [Português (Brasil)](README.pt-BR.md) | [한국어](README.ko-KR.md) | [日本語](README.ja.md) | [Русский](README.ru.md) | [简体中文](README.cn.md) | [繁體中文](README.zh-TW.md)
 
 <p align="center">
@@ -61,6 +65,32 @@ Career-ops is agentic: Claude Code navigates career pages with Playwright, evalu
 > **Heads up: the first evaluations won't be great.** The system doesn't know you yet. Feed it context -- your CV, your career story, your proof points, your preferences, what you're good at, what you want to avoid. The more you nurture it, the better it gets. Think of it as onboarding a new recruiter: the first week they need to learn about you, then they become invaluable.
 
 Built by someone who used it to evaluate 740+ job offers, generate 100+ tailored CVs, and land a Head of Applied AI role. [Read the full case study](https://santifer.io/career-ops-system).
+
+## Architecture
+
+```mermaid
+flowchart TB
+    URL["Entrée<br/>URL ou description de poste"]
+    SCAN["scan.mjs<br/>portails Greenhouse · Ashby · Lever"]
+    MODES["Modes d'évaluation<br/>modes/*.md · oferta · scoring A-G"]
+    CV["Sources<br/>cv.md · config/profile.yml · modes/_profile.md"]
+    REPORTS["Rapports<br/>reports/*.md · blocs A-G"]
+    PDF["generate-pdf.mjs<br/>Playwright · CV ATS HTML vers PDF"]
+    LATEX["generate-latex.mjs<br/>export CV LaTeX Overleaf"]
+    TRACKER["merge-tracker.mjs<br/>data/applications.md · TSV"]
+    VERIFY["verify-pipeline.mjs<br/>dedup · normalize · health check"]
+    DASH["Dashboard Go<br/>Bubble Tea · Lipgloss · TUI"]
+
+    URL --> MODES
+    SCAN --> MODES
+    CV --> MODES
+    MODES --> REPORTS
+    MODES --> PDF
+    MODES --> LATEX
+    REPORTS --> TRACKER
+    TRACKER --> VERIFY
+    TRACKER --> DASH
+```
 
 ## Features
 
