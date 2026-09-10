@@ -1,0 +1,400 @@
+[2026-08-22T12:00:56] ============================================================
+[2026-08-22T12:00:56] Ralph loop start - cwd=C:\Users\adamb\Documents\Projets\community\career-ops
+[2026-08-22T12:00:56] > node scan.mjs
+[2026-08-22T12:01:16]   stdout[last 800]: ance Data & Insights | New York, NY
+  + Spotify | Director of ML Engineering, Conversation Product Area | New York, NY
+  + Spotify | Machine Learning Engineering Manager, Personalization | New York, NY
+  + Spotify | Senior Data Engineer - Data Platform | London
+  + Spotify | Senior Machine Learning Engineer, Personalization, Magenta | New York, NY
+  + Spotify | Senior Product Quality Analyst - AI Voice | New York, NY
+  + Spotify | Senior Software Engineer - Enterprise AI | New York, NY
+  + Spotify | Staff Machine Learning Engineer, Personalization | New York, NY
+  + Pigment | Optimisation AI Scientist | London or Paris
+
+Results saved to data/pipeline.md and data/scan-history.tsv
+
+→ Run /career-ops pipeline to evaluate new offers.
+→ Share results and get help: https://discord.gg/8pRpHETxa4
+
+[2026-08-22T12:01:16] scan.mjs rc=0
+[2026-08-22T12:01:16] > node check-liveness.mjs
+[2026-08-22T12:01:23]   stderr[last 400]: Usage: node check-liveness.mjs [--no-fallback] [--throttle[=ms]] <url1> [url2] ...
+       node check-liveness.mjs [--no-fallback] [--throttle[=ms]] --file urls.txt
+
+[2026-08-22T12:01:23] check-liveness.mjs rc=1
+[2026-08-22T12:01:23] > C:\Users\adamb\.local\bin\claude.exe --print --dangerously-skip-permissions Ralph loop career-ops pass - pipeline alternance M2 2026 Adam Beloucif.
+
+Repertoire de travail - C:/Users/adamb/Documents/Projets/community/career-ops/
+
+Lire d'abord modes/_custom.md et modes/_profile.md - ce sont les regles maison d'Adam et elles priment sur ce prompt.
+
+Etape 1 - Lire data/pipeline.md (vient d'etre rempli par scan.mjs). Filtrer les offres pour ne garder que celles qui matchent TOUS ces criteres -
+- **Localisation - Ile-de-France uniquement** - Paris (75), Hauts-de-Seine (92), Seine-Saint-Denis (93), Val-de-Marne (94), Val-d'Oise (95), Yvelines (78), Essonne (91), Seine-et-Marne (77). Rejeter systematiquement - tout poste Lyon, Marseille, Toulouse, Nantes, Bordeaux, Lille, Strasbourg, etc. Rejeter aussi tout poste hors France metropolitaine (USA, UK, Suisse, Belgique, remote international).
+- Type de contrat - Alternance, Apprentissage, ou mention M2 / Master 2 / 2025 / 2026.
+- Metier - Data Engineer, Data Scientist, Data Analyst, ML Engineer, IA / AI Engineer, Data Platform, MLOps, Analytics Engineer. Exclure roles non-data (marketing, sales, legal, customer support).
+
+Note - remote-friendly IDF accepte uniquement si l'entreprise a son siege ou un site IDF et que Adam peut s'y rendre en 1h30 max depuis Chevilly-Larue (94) en transport.
+
+Etape 2 - Pour chaque offre filtree, executer le mode `oferta` de career-ops - evaluation A-G selon modes/_profile.md + modes/fr/offre.md. Produire un rapport dans reports/{num}-{company-slug}-{YYYY-MM-DD}.md avec Blocks A-F + G (Legitimacy).
+
+Etape 3 - Pour toute offre avec score final >= 4.0/5, generer CV + LM personnalises -
+- Template impose - `ats` (ATS strict, une page, noir et blanc). C'est le defaut de config/profile.yml, ne pas le surcharger.
+- CV - construire le payload JSON puis `node build-cv-html.mjs output/cv-adam-beloucif-{slug}.json output/cv-adam-beloucif-{slug}.html $(node cv-templates.mjs resolve cv)`, puis `node verify-cv-facts.mjs`, puis `node generate-pdf.mjs ... --format=a4 --max-pages=1 --strict-pages --report={num}`.
+- Lettre - payload JSON puis `node generate-cover-letter.mjs --payload output/lm-adam-beloucif-{slug}.json --out output/lm-adam-beloucif-{slug}-{date}.pdf --format a4 --report {num}`.
+- Structure cible - `C:/Users/adamb/Desktop/Alternance M2 Data Engineering IA/{Entreprise} - {Poste} ({Ville})/` (creer le dossier si absent) avec -
+  - `Adam-Beloucif-CV-{Entreprise}-{Poste}.pdf`
+  - `Adam-Beloucif-LM-{Entreprise}-{Poste}.pdf`
+  - `rapport-evaluation.md` - copie du rapport de reports/.
+- Verifier que chaque PDF tient en 1 page stricte via pypdf.
+- Mettre a jour `C:/Users/adamb/Desktop/Alternance M2 Data Engineering IA/00-SUIVI.md` avec le nouveau dossier + statut "Evaluated", et preparer la ligne a reporter dans le Google Sheet de suivi (16 colonnes, voir modes/_custom.md).
+
+Contraintes non-negociables -
+- Ton sobre, FR soutenu, aucune mention Claude / LLM / Groq / Llama / Sentence-Transformers comme produits commerciaux - rester generique (NLP, IA generative, agents).
+- Aucune mention BDE Efrei President, Secretaire BDA, Professeur de danse Rock Efreestyle, Fondateur Douille, BIA, Aerogligli.
+- Conserver uniquement Vice-President BDE ISIT (deux mandats fev 2024 a sept 2025) + cours de danse benevoles week-end.
+- Email pro CV - adam.beloucif@efrei.net - Telephone - +33 7 86 46 68 34 - Residence - Chevilly-Larue (94).
+- Aucune soumission automatique - generer les documents, pas cliquer Submit.
+
+Etape 4 - Pour chaque offre prete, ecrire un TSV dans batch/tracker-additions/{num}-{company-slug}.tsv avec columns - num date company role status score pdf report notes. Status = "Evaluated". Ensuite lancer `node merge-tracker.mjs` puis `node verify-pipeline.mjs`.
+
+Etape 5 - Apres tout le traitement, ajouter une ligne dans C:/Users/adamb/Documents/Obsidian/Claude/Apprentissages.md sous la date du jour (format ## 2026-MM-DD (suite NN - Ralph loop run)). Lister les entreprises preparees + les PDFs generes + l'action list pour Adam (liens directs vers les portails de candidature).
+
+Sortie finale - rapport court (< 300 mots) avec -
+- Nombre d'offres scannees.
+- Nombre d'offres filtrees alternance M2 FR Data/IA.
+- Top 10 candidatures preparees (company, role, score, PDFs generes).
+- Action list Adam (3-5 items prioritaires).
+
+Temps max alloue - 15 minutes.
+
+[2026-08-22T12:10:07]   stdout[last 800]: s anterieurs a la regle `--strict-pages`. Marques NON dans `00-SUIVI.md`, pas maquilles.
+
+**Top dossiers (existants, re-livres)** : Hermes 4.6 - CND 4.5 - Bouygues 709 4.5 - Thales 4.4 - Bouygues 525 4.3, Numberly 4.3, CHANEL 4.3, Hitachi Rail 4.3.
+
+**Action list**
+
+1. Regenerer en 1 page les 3 CV Bouygues + la LM Thales (payload JSON absent, sources HTML dans `output/`).
+2. Arbitrer les 4 dossiers encore `Evaluated` : Thales 4.4, AS International 4.2, BPCE 4.1, GRDF 4.0.
+3. Relances J+10 echues depuis le 2026-08-07 : CND, Hermes, Numberly, CHANEL, Hitachi Rail.
+4. Repeupler `tracked_companies` avec des grands groupes IDF - c'est le seul vrai deblocage, et il demande des `careers_url` verifies que je n'ai pas devines.
+5. Verifier la vivacite des offres Bouygues d'avril avant d'y investir.
+
+[2026-08-22T12:10:07] claude headless rc=0
+[2026-08-22T12:10:07] > node merge-tracker.mjs
+[2026-08-22T12:10:07]   stdout[last 800]: 🔒 Tracker merge lock acquired (wait_ms=3 | attempts=1 | stale_recovered=false)
+📊 Existing: 13 entries, max #13
+✅ No pending additions to merge.
+
+[2026-08-22T12:10:07] merge-tracker.mjs rc=0
+[2026-08-22T12:10:07] > node verify-pipeline.mjs
+[2026-08-22T12:10:07]   stdout[last 800]: 
+📊 Checking 13 entries in applications.md
+
+✅ All statuses are canonical
+✅ No exact duplicates found
+✅ All report links valid
+✅ All scores valid
+✅ All rows properly formatted
+✅ No pending TSVs
+✅ No bold in scores
+✅ No stale reservation sentinels
+✅ No duplicate reports for the same company+role
+✅ No orphan reports
+✅ Via channels consistent
+✅ No duplicate tracker numbers
+
+==================================================
+📊 Pipeline Health: 0 errors, 0 warnings
+🟢 Pipeline is clean!
+
+[2026-08-22T12:10:07] verify-pipeline.mjs rc=0
+[2026-08-22T12:10:07] Ralph loop done.
+[2026-08-28T11:10:26] ============================================================
+[2026-08-28T11:10:26] Ralph loop start - cwd=C:\Users\adamb\Documents\Projets\community\career-ops
+[2026-08-28T11:10:26] > node scan.mjs
+[2026-08-28T11:10:46]   stdout[last 800]: eployed" OR "Developer Relations" OR "Founding" site:workatastartup.com OR site:getzep.com
+  • Maxim AI (websearch) — "Maxim AI" OR "getmaxim" careers "engineer" OR "product"
+
+🚨 FIX NEEDED: 12 target(s) have been unreachable for 3+ runs:
+   Temporal, Ada, RunPod, Factorial, Weights & Biases, Clarity AI, Forto, Vinted, Lindy, Runway, Travelperk, Tinybird
+   Run: node verify-portals.mjs to check if the ATS migrated, or update their board slugs.
+🟡 3 target(s) live but empty: Mistral AI, Lakera, Clerk
+
+New offers:
+  + Qonto | Analytics Engineer | Paris
+  + HelloFresh | HR & Data Manager - CDD (M/F/X) | Paris, Paris, France
+
+Results saved to data/pipeline.md and data/scan-history.tsv
+
+→ Run /career-ops pipeline to evaluate new offers.
+→ Share results and get help: https://discord.gg/8pRpHETxa4
+
+[2026-08-28T11:10:46] scan.mjs rc=0
+[2026-08-28T11:10:47] > node check-liveness.mjs
+[2026-08-28T11:10:48]   stderr[last 400]: Usage: node check-liveness.mjs [--no-fallback] [--throttle[=ms]] <url1> [url2] ...
+       node check-liveness.mjs [--no-fallback] [--throttle[=ms]] --file urls.txt
+
+[2026-08-28T11:10:48] check-liveness.mjs rc=1
+[2026-08-28T11:10:48] > C:\Users\adamb\.local\bin\claude.exe --print --dangerously-skip-permissions Ralph loop career-ops pass - pipeline alternance M2 2026 Adam Beloucif.
+
+Repertoire de travail - C:/Users/adamb/Documents/Projets/community/career-ops/
+
+Lire d'abord modes/_custom.md et modes/_profile.md - ce sont les regles maison d'Adam et elles priment sur ce prompt.
+
+Etape 1 - Lire data/pipeline.md (vient d'etre rempli par scan.mjs). Filtrer les offres pour ne garder que celles qui matchent TOUS ces criteres -
+- **Localisation - Ile-de-France uniquement** - Paris (75), Hauts-de-Seine (92), Seine-Saint-Denis (93), Val-de-Marne (94), Val-d'Oise (95), Yvelines (78), Essonne (91), Seine-et-Marne (77). Rejeter systematiquement - tout poste Lyon, Marseille, Toulouse, Nantes, Bordeaux, Lille, Strasbourg, etc. Rejeter aussi tout poste hors France metropolitaine (USA, UK, Suisse, Belgique, remote international).
+- Type de contrat - Alternance, Apprentissage, ou mention M2 / Master 2 / 2025 / 2026.
+- Metier - Data Engineer, Data Scientist, Data Analyst, ML Engineer, IA / AI Engineer, Data Platform, MLOps, Analytics Engineer. Exclure roles non-data (marketing, sales, legal, customer support).
+
+Note - remote-friendly IDF accepte uniquement si l'entreprise a son siege ou un site IDF et que Adam peut s'y rendre en 1h30 max depuis Chevilly-Larue (94) en transport.
+
+Etape 2 - Pour chaque offre filtree, executer le mode `oferta` de career-ops - evaluation A-G selon modes/_profile.md + modes/fr/offre.md. Produire un rapport dans reports/{num}-{company-slug}-{YYYY-MM-DD}.md avec Blocks A-F + G (Legitimacy).
+
+Etape 3 - Pour toute offre avec score final >= 4.0/5, generer CV + LM personnalises -
+- Template impose - `ats` (ATS strict, une page, noir et blanc). C'est le defaut de config/profile.yml, ne pas le surcharger.
+- CV - construire le payload JSON puis `node build-cv-html.mjs output/cv-adam-beloucif-{slug}.json output/cv-adam-beloucif-{slug}.html $(node cv-templates.mjs resolve cv)`, puis `node verify-cv-facts.mjs`, puis `node generate-pdf.mjs ... --format=a4 --max-pages=1 --strict-pages --report={num}`.
+- Lettre - payload JSON puis `node generate-cover-letter.mjs --payload output/lm-adam-beloucif-{slug}.json --out output/lm-adam-beloucif-{slug}-{date}.pdf --format a4 --report {num}`.
+- Structure cible - `C:/Users/adamb/Desktop/Alternance M2 Data Engineering IA/{Entreprise} - {Poste} ({Ville})/` (creer le dossier si absent) avec -
+  - `Adam-Beloucif-CV-{Entreprise}-{Poste}.pdf`
+  - `Adam-Beloucif-LM-{Entreprise}-{Poste}.pdf`
+  - `rapport-evaluation.md` - copie du rapport de reports/.
+- Verifier que chaque PDF tient en 1 page stricte via pypdf.
+- Mettre a jour `C:/Users/adamb/Desktop/Alternance M2 Data Engineering IA/00-SUIVI.md` avec le nouveau dossier + statut "Evaluated", et preparer la ligne a reporter dans le Google Sheet de suivi (16 colonnes, voir modes/_custom.md).
+
+Contraintes non-negociables -
+- Ton sobre, FR soutenu, aucune mention Claude / LLM / Groq / Llama / Sentence-Transformers comme produits commerciaux - rester generique (NLP, IA generative, agents).
+- Aucune mention BDE Efrei President, Secretaire BDA, Professeur de danse Rock Efreestyle, Fondateur Douille, BIA, Aerogligli.
+- Conserver uniquement Vice-President BDE ISIT (deux mandats fev 2024 a sept 2025) + cours de danse benevoles week-end.
+- Email pro CV - adam.beloucif@efrei.net - Telephone - +33 7 86 46 68 34 - Residence - Chevilly-Larue (94).
+- Aucune soumission automatique - generer les documents, pas cliquer Submit.
+
+Etape 4 - Pour chaque offre prete, ecrire un TSV dans batch/tracker-additions/{num}-{company-slug}.tsv avec columns - num date company role status score pdf report notes. Status = "Evaluated". Ensuite lancer `node merge-tracker.mjs` puis `node verify-pipeline.mjs`.
+
+Etape 5 - Apres tout le traitement, ajouter une ligne dans C:/Users/adamb/Documents/Obsidian/Claude/Apprentissages.md sous la date du jour (format ## 2026-MM-DD (suite NN - Ralph loop run)). Lister les entreprises preparees + les PDFs generes + l'action list pour Adam (liens directs vers les portails de candidature).
+
+Sortie finale - rapport court (< 300 mots) avec -
+- Nombre d'offres scannees.
+- Nombre d'offres filtrees alternance M2 FR Data/IA.
+- Top 10 candidatures preparees (company, role, score, PDFs generes).
+- Action list Adam (3-5 items prioritaires).
+
+Temps max alloue - 15 minutes.
+
+[2026-08-28T11:16:13]   stdout[last 800]: pages, en violation de la règle ATS. Payloads JSON absents d'`output/`, donc reconstruction complète. Offres datées du 22/04, non confirmées vivantes. Je ne retaille pas trois dossiers vers des annonces peut-être fermées. Dette écrite dans `00-SUIVI.md`.
+
+### Action list
+
+1. **Réparer Playwright** - bloque la vérification d'offre, règle career-ops obligatoire.
+2. **BPCE** (4.1) - https://www.welcometothejungle.com/fr/companies/groupe-bpce/jobs/alternance-data-engineer-hadoop-gcp-f-h-idf_charenton-le-pont - dossier complet 1 page, à envoyer si vivante.
+3. **GRDF** (4.0) - https://jobs.engie.com/grdf/job/Ing%C3%A9nieur-BIG-DATA-et-IA/60640-fr_FR/ - idem.
+4. **Bouygues x3** - vérifier à la main avant toute régénération.
+5. **Relances J+10 échues** sur les 5 candidatures envoyées fin juillet.
+
+[2026-08-28T11:16:13] claude headless rc=0
+[2026-08-28T11:16:13] > node merge-tracker.mjs
+[2026-08-28T11:16:13]   stdout[last 800]: 🔒 Tracker merge lock acquired (wait_ms=1 | attempts=1 | stale_recovered=false)
+📊 Existing: 13 entries, max #13
+✅ No pending additions to merge.
+
+[2026-08-28T11:16:13] merge-tracker.mjs rc=0
+[2026-08-28T11:16:13] > node verify-pipeline.mjs
+[2026-08-28T11:16:13]   stdout[last 800]: 
+📊 Checking 13 entries in applications.md
+
+✅ All statuses are canonical
+✅ No exact duplicates found
+✅ All report links valid
+✅ All scores valid
+✅ All rows properly formatted
+✅ No pending TSVs
+✅ No bold in scores
+✅ No stale reservation sentinels
+✅ No duplicate reports for the same company+role
+✅ No orphan reports
+✅ Via channels consistent
+✅ No duplicate tracker numbers
+
+==================================================
+📊 Pipeline Health: 0 errors, 0 warnings
+🟢 Pipeline is clean!
+
+[2026-08-28T11:16:13] verify-pipeline.mjs rc=0
+[2026-08-28T11:16:13] Ralph loop done.
+[2026-08-31T09:00:01] ============================================================
+[2026-08-31T09:00:01] Ralph loop start - cwd=C:\Users\adamb\Documents\Projets\community\career-ops
+[2026-08-31T09:00:01] > node scan.mjs
+[2026-08-31T09:00:07]   stdout[last 800]: ake.com" "engineer" OR "solutions" site:jobs.ashbyhq.com
+  • Zep AI (websearch) — "Zep" "Forward Deployed" OR "Developer Relations" OR "Founding" site:workatastartup.com OR site:getzep.com
+  • Maxim AI (websearch) — "Maxim AI" OR "getmaxim" careers "engineer" OR "product"
+
+🚨 FIX NEEDED: 12 target(s) have been unreachable for 3+ runs:
+   RunPod, Ada, Temporal, Factorial, Weights & Biases, Clarity AI, Forto, Runway, Vinted, Lindy, Travelperk, Tinybird
+   Run: node verify-portals.mjs to check if the ATS migrated, or update their board slugs.
+
+⚠️  1 target(s) unreachable (slug?): Black Forest Labs — run: node verify-portals.mjs
+🟡 3 target(s) live but empty: Mistral AI, Lakera, Clerk
+
+→ Run /career-ops pipeline to evaluate new offers.
+→ Share results and get help: https://discord.gg/8pRpHETxa4
+
+[2026-08-31T09:00:07] scan.mjs rc=0
+[2026-08-31T09:00:07] > node check-liveness.mjs
+[2026-08-31T09:00:09]   stderr[last 400]: Usage: node check-liveness.mjs [--no-fallback] [--throttle[=ms]] <url1> [url2] ...
+       node check-liveness.mjs [--no-fallback] [--throttle[=ms]] --file urls.txt
+
+[2026-08-31T09:00:09] check-liveness.mjs rc=1
+[2026-08-31T09:00:09] > C:\Users\adamb\.local\bin\claude.exe --print --dangerously-skip-permissions Ralph loop career-ops pass - pipeline alternance M2 2026 Adam Beloucif.
+
+Repertoire de travail - C:/Users/adamb/Documents/Projets/community/career-ops/
+
+Lire d'abord modes/_custom.md et modes/_profile.md - ce sont les regles maison d'Adam et elles priment sur ce prompt.
+
+Etape 1 - Lire data/pipeline.md (vient d'etre rempli par scan.mjs). Filtrer les offres pour ne garder que celles qui matchent TOUS ces criteres -
+- **Localisation - Ile-de-France uniquement** - Paris (75), Hauts-de-Seine (92), Seine-Saint-Denis (93), Val-de-Marne (94), Val-d'Oise (95), Yvelines (78), Essonne (91), Seine-et-Marne (77). Rejeter systematiquement - tout poste Lyon, Marseille, Toulouse, Nantes, Bordeaux, Lille, Strasbourg, etc. Rejeter aussi tout poste hors France metropolitaine (USA, UK, Suisse, Belgique, remote international).
+- Type de contrat - Alternance, Apprentissage, ou mention M2 / Master 2 / 2025 / 2026.
+- Metier - Data Engineer, Data Scientist, Data Analyst, ML Engineer, IA / AI Engineer, Data Platform, MLOps, Analytics Engineer. Exclure roles non-data (marketing, sales, legal, customer support).
+
+Note - remote-friendly IDF accepte uniquement si l'entreprise a son siege ou un site IDF et que Adam peut s'y rendre en 1h30 max depuis Chevilly-Larue (94) en transport.
+
+Etape 2 - Pour chaque offre filtree, executer le mode `oferta` de career-ops - evaluation A-G selon modes/_profile.md + modes/fr/offre.md. Produire un rapport dans reports/{num}-{company-slug}-{YYYY-MM-DD}.md avec Blocks A-F + G (Legitimacy).
+
+Etape 3 - Pour toute offre avec score final >= 4.0/5, generer CV + LM personnalises -
+- Template impose - `ats` (ATS strict, une page, noir et blanc). C'est le defaut de config/profile.yml, ne pas le surcharger.
+- CV - construire le payload JSON puis `node build-cv-html.mjs output/cv-adam-beloucif-{slug}.json output/cv-adam-beloucif-{slug}.html $(node cv-templates.mjs resolve cv)`, puis `node verify-cv-facts.mjs`, puis `node generate-pdf.mjs ... --format=a4 --max-pages=1 --strict-pages --report={num}`.
+- Lettre - payload JSON puis `node generate-cover-letter.mjs --payload output/lm-adam-beloucif-{slug}.json --out output/lm-adam-beloucif-{slug}-{date}.pdf --format a4 --report {num}`.
+- Structure cible - `C:/Users/adamb/Desktop/Alternance M2 Data Engineering IA/{Entreprise} - {Poste} ({Ville})/` (creer le dossier si absent) avec -
+  - `Adam-Beloucif-CV-{Entreprise}-{Poste}.pdf`
+  - `Adam-Beloucif-LM-{Entreprise}-{Poste}.pdf`
+  - `rapport-evaluation.md` - copie du rapport de reports/.
+- Verifier que chaque PDF tient en 1 page stricte via pypdf.
+- Mettre a jour `C:/Users/adamb/Desktop/Alternance M2 Data Engineering IA/00-SUIVI.md` avec le nouveau dossier + statut "Evaluated", et preparer la ligne a reporter dans le Google Sheet de suivi (16 colonnes, voir modes/_custom.md).
+
+Contraintes non-negociables -
+- Ton sobre, FR soutenu, aucune mention Claude / LLM / Groq / Llama / Sentence-Transformers comme produits commerciaux - rester generique (NLP, IA generative, agents).
+- Aucune mention BDE Efrei President, Secretaire BDA, Professeur de danse Rock Efreestyle, Fondateur Douille, BIA, Aerogligli.
+- Conserver uniquement Vice-President BDE ISIT (deux mandats fev 2024 a sept 2025) + cours de danse benevoles week-end.
+- Email pro CV - adam.beloucif@efrei.net - Telephone - +33 7 86 46 68 34 - Residence - Chevilly-Larue (94).
+- Aucune soumission automatique - generer les documents, pas cliquer Submit.
+
+Etape 4 - Pour chaque offre prete, ecrire un TSV dans batch/tracker-additions/{num}-{company-slug}.tsv avec columns - num date company role status score pdf report notes. Status = "Evaluated". Ensuite lancer `node merge-tracker.mjs` puis `node verify-pipeline.mjs`.
+
+Etape 5 - Apres tout le traitement, ajouter une ligne dans C:/Users/adamb/Documents/Obsidian/Claude/Apprentissages.md sous la date du jour (format ## 2026-MM-DD (suite NN - Ralph loop run)). Lister les entreprises preparees + les PDFs generes + l'action list pour Adam (liens directs vers les portails de candidature).
+
+Sortie finale - rapport court (< 300 mots) avec -
+- Nombre d'offres scannees.
+- Nombre d'offres filtrees alternance M2 FR Data/IA.
+- Top 10 candidatures preparees (company, role, score, PDFs generes).
+- Action list Adam (3-5 items prioritaires).
+
+Temps max alloue - 15 minutes.
+
+[2026-09-07T13:57:09] ============================================================
+[2026-09-07T13:57:09] Ralph loop start - cwd=C:\Users\adamb\Documents\Projets\community\career-ops
+[2026-09-07T13:57:09] > node scan.mjs
+[2026-09-07T13:57:30]   stdout[last 800]: " OR "solutions" site:jobs.ashbyhq.com
+  • Zep AI (websearch) — "Zep" "Forward Deployed" OR "Developer Relations" OR "Founding" site:workatastartup.com OR site:getzep.com
+  • Maxim AI (websearch) — "Maxim AI" OR "getmaxim" careers "engineer" OR "product"
+
+🚨 FIX NEEDED: 12 target(s) have been unreachable for 3+ runs:
+   Temporal, RunPod, Ada, Factorial, Weights & Biases, Clarity AI, Forto, Lindy, Vinted, Tinybird, Runway, Travelperk
+   Run: node verify-portals.mjs to check if the ATS migrated, or update their board slugs.
+
+⚠️  1 target(s) unreachable (slug?): Black Forest Labs — run: node verify-portals.mjs
+🟡 4 target(s) live but empty: Aleph Alpha, Mistral AI, Contentful, Lakera
+
+→ Run /career-ops pipeline to evaluate new offers.
+→ Share results and get help: https://discord.gg/8pRpHETxa4
+
+[2026-09-07T13:57:30] scan.mjs rc=0
+[2026-09-07T13:57:31] > node check-liveness.mjs
+[2026-09-07T13:57:35]   stderr[last 400]: Usage: node check-liveness.mjs [--no-fallback] [--throttle[=ms]] <url1> [url2] ...
+       node check-liveness.mjs [--no-fallback] [--throttle[=ms]] --file urls.txt
+
+[2026-09-07T13:57:35] check-liveness.mjs rc=1
+[2026-09-07T13:57:35] > C:\Users\adamb\.local\bin\claude.exe --print --dangerously-skip-permissions Ralph loop career-ops pass - pipeline alternance M2 2026 Adam Beloucif.
+
+Repertoire de travail - C:/Users/adamb/Documents/Projets/community/career-ops/
+
+Lire d'abord modes/_custom.md et modes/_profile.md - ce sont les regles maison d'Adam et elles priment sur ce prompt.
+
+Etape 1 - Lire data/pipeline.md (vient d'etre rempli par scan.mjs). Filtrer les offres pour ne garder que celles qui matchent TOUS ces criteres -
+- **Localisation - Ile-de-France uniquement** - Paris (75), Hauts-de-Seine (92), Seine-Saint-Denis (93), Val-de-Marne (94), Val-d'Oise (95), Yvelines (78), Essonne (91), Seine-et-Marne (77). Rejeter systematiquement - tout poste Lyon, Marseille, Toulouse, Nantes, Bordeaux, Lille, Strasbourg, etc. Rejeter aussi tout poste hors France metropolitaine (USA, UK, Suisse, Belgique, remote international).
+- Type de contrat - Alternance, Apprentissage, ou mention M2 / Master 2 / 2025 / 2026.
+- Metier - Data Engineer, Data Scientist, Data Analyst, ML Engineer, IA / AI Engineer, Data Platform, MLOps, Analytics Engineer. Exclure roles non-data (marketing, sales, legal, customer support).
+
+Note - remote-friendly IDF accepte uniquement si l'entreprise a son siege ou un site IDF et que Adam peut s'y rendre en 1h30 max depuis Chevilly-Larue (94) en transport.
+
+Etape 2 - Pour chaque offre filtree, executer le mode `oferta` de career-ops - evaluation A-G selon modes/_profile.md + modes/fr/offre.md. Produire un rapport dans reports/{num}-{company-slug}-{YYYY-MM-DD}.md avec Blocks A-F + G (Legitimacy).
+
+Etape 3 - Pour toute offre avec score final >= 4.0/5, generer CV + LM personnalises -
+- Template impose - `ats` (ATS strict, une page, noir et blanc). C'est le defaut de config/profile.yml, ne pas le surcharger.
+- CV - construire le payload JSON puis `node build-cv-html.mjs output/cv-adam-beloucif-{slug}.json output/cv-adam-beloucif-{slug}.html $(node cv-templates.mjs resolve cv)`, puis `node verify-cv-facts.mjs`, puis `node generate-pdf.mjs ... --format=a4 --max-pages=1 --strict-pages --report={num}`.
+- Lettre - payload JSON puis `node generate-cover-letter.mjs --payload output/lm-adam-beloucif-{slug}.json --out output/lm-adam-beloucif-{slug}-{date}.pdf --format a4 --report {num}`.
+- Structure cible - `C:/Users/adamb/Desktop/Alternance M2 Data Engineering IA/{Entreprise} - {Poste} ({Ville})/` (creer le dossier si absent) avec -
+  - `Adam-Beloucif-CV-{Entreprise}-{Poste}.pdf`
+  - `Adam-Beloucif-LM-{Entreprise}-{Poste}.pdf`
+  - `rapport-evaluation.md` - copie du rapport de reports/.
+- Verifier que chaque PDF tient en 1 page stricte via pypdf.
+- Mettre a jour `C:/Users/adamb/Desktop/Alternance M2 Data Engineering IA/00-SUIVI.md` avec le nouveau dossier + statut "Evaluated", et preparer la ligne a reporter dans le Google Sheet de suivi (16 colonnes, voir modes/_custom.md).
+
+Contraintes non-negociables -
+- Ton sobre, FR soutenu, aucune mention Claude / LLM / Groq / Llama / Sentence-Transformers comme produits commerciaux - rester generique (NLP, IA generative, agents).
+- Aucune mention BDE Efrei President, Secretaire BDA, Professeur de danse Rock Efreestyle, Fondateur Douille, BIA, Aerogligli.
+- Conserver uniquement Vice-President BDE ISIT (deux mandats fev 2024 a sept 2025) + cours de danse benevoles week-end.
+- Email pro CV - adam.beloucif@efrei.net - Telephone - +33 7 86 46 68 34 - Residence - Chevilly-Larue (94).
+- Aucune soumission automatique - generer les documents, pas cliquer Submit.
+
+Etape 4 - Pour chaque offre prete, ecrire un TSV dans batch/tracker-additions/{num}-{company-slug}.tsv avec columns - num date company role status score pdf report notes. Status = "Evaluated". Ensuite lancer `node merge-tracker.mjs` puis `node verify-pipeline.mjs`.
+
+Etape 5 - Apres tout le traitement, ajouter une ligne dans C:/Users/adamb/Documents/Obsidian/Claude/Apprentissages.md sous la date du jour (format ## 2026-MM-DD (suite NN - Ralph loop run)). Lister les entreprises preparees + les PDFs generes + l'action list pour Adam (liens directs vers les portails de candidature).
+
+Sortie finale - rapport court (< 300 mots) avec -
+- Nombre d'offres scannees.
+- Nombre d'offres filtrees alternance M2 FR Data/IA.
+- Top 10 candidatures preparees (company, role, score, PDFs generes).
+- Action list Adam (3-5 items prioritaires).
+
+Temps max alloue - 15 minutes.
+
+[2026-09-07T14:00:51]   stdout[last 800]: préparées | 0 |
+| CV / LM générés | 0 |
+| TSV + merge-tracker | sans objet, aucune ligne à écrire |
+| Journal Apprentissages | écrit, contrôle typo passé |
+| 00-SUIVI.md | mis à jour, recherche marquée close |
+
+`verify-pipeline.mjs` rendu vert sur 13 entrées, 0 erreur, 0 avertissement.
+
+**Ce qui demande ton arbitrage :** les cinq dossiers en statut `Applied` (Hermès, Commissariat au Numérique de Défense, Numberly, CHANEL, Hitachi Rail) sont en retard de relance de 33 à 34 jours, aucune relance envoyée. Si la recherche est close, ils se clôturent plutôt qu'ils ne se relancent - mais je n'ai pas touché au tracker, c'est ta décision.
+
+Deux choses à trancher : veux-tu que je passe ces cinq lignes en `Discarded`, et veux-tu désarmer ce loop pour qu'il cesse de tourner sur une prémisse périmée.
+
+[2026-09-07T14:00:51] claude headless rc=0
+[2026-09-07T14:00:51] > node merge-tracker.mjs
+[2026-09-07T14:00:51]   stdout[last 800]: 🔒 Tracker merge lock acquired (wait_ms=2 | attempts=1 | stale_recovered=false)
+📊 Existing: 13 entries, max #13
+✅ No pending additions to merge.
+
+[2026-09-07T14:00:51] merge-tracker.mjs rc=0
+[2026-09-07T14:00:51] > node verify-pipeline.mjs
+[2026-09-07T14:00:51]   stdout[last 800]: 
+📊 Checking 13 entries in applications.md
+
+✅ All statuses are canonical
+✅ No exact duplicates found
+✅ All report links valid
+✅ All scores valid
+✅ All rows properly formatted
+✅ No pending TSVs
+✅ No bold in scores
+✅ No stale reservation sentinels
+✅ No duplicate reports for the same company+role
+✅ No orphan reports
+✅ Via channels consistent
+✅ No duplicate tracker numbers
+
+==================================================
+📊 Pipeline Health: 0 errors, 0 warnings
+🟢 Pipeline is clean!
+
+[2026-09-07T14:00:51] verify-pipeline.mjs rc=0
+[2026-09-07T14:00:51] Ralph loop done.

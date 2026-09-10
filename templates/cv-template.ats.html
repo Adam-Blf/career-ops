@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{NAME}} - CV</title>
+<!-- career-ops-template
+  name: ATS une page (noir et blanc)
+  description: Colonne unique, grayscale strict, police systeme, densite calibree pour tenir sur une page A4.
+-->
+<style>
+  /* ===================================================================
+     Template ATS strict, une page, noir et blanc.
+
+     Contraintes tenues ici, et pas ailleurs :
+     - aucune couleur (grayscale seul), aucun fond colore, aucun aplat
+     - colonne unique, aucun sidebar, aucun tableau imbrique
+     - pile de polices systeme statique (pas de webfont) : les woff2 variables
+       font injecter des espaces parasites a l'extraction PDF, ce qui casse le
+       parsing de mots-cles cote ATS
+     - densite reglee pour une page A4 : marges, interlignes et tailles sont
+       les leviers de compression, dans cet ordre
+
+     Meme DOM et memes classes que templates/cv-template.html, donc
+     build-cv-html.mjs remplit ce fichier sans modification.
+     =================================================================== */
+  :root {
+    --font-family: "Liberation Sans", 'Helvetica Neue', Arial, 'DejaVu Sans', sans-serif;
+    --font-size: 10px;
+    --ink: #000000;
+    --ink-soft: #333333;
+    --ink-mute: #555555;
+    --rule: #000000;
+    --rule-soft: #bbbbbb;
+    /* Doit rester aligne sur PDF_PAGE_MARGIN de generate-pdf.mjs. */
+    --page-margin: 0.45in;
+  }
+  @page { margin: var(--page-margin); }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* Les ligatures fi/fl/ffi sont substituees par Chromium en U+FB01/FB02/FB03
+       a la mise en page PDF, et ressortent telles quelles a l'extraction : une
+       recherche litterale de "verification" rate alors le mot. */
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "clig" 0, "dlig" 0;
+  }
+
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    font-family: var(--font-family);
+    font-size: var(--font-size);
+    line-height: 1.38;
+    color: var(--ink);
+    background: #ffffff;
+    padding: 0;
+    margin: 0;
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "clig" 0, "dlig" 0;
+  }
+
+  .page {
+    width: 100%;
+    max-width: {{PAGE_WIDTH}};
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  /* === EN-TETE === */
+  .header {
+    margin-bottom: 10px;
+  }
+
+  .header h1 {
+    font-family: var(--font-family);
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    line-height: 1.1;
+  }
+
+  /* Le filet plein remplace le degrade du template standard. */
+  .header-gradient {
+    height: 1px;
+    background: var(--rule);
+    margin-bottom: 6px;
+  }
+
+  .contact-row {
+    display: block;
+    font-family: var(--font-family);
+    font-size: 9.5px;
+    line-height: 1.4;
+    color: var(--ink-soft);
+  }
+
+  .contact-row a {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+
+  .contact-row .separator {
+    color: var(--ink-mute);
+    padding: 0 4px;
+  }
+
+  /* Photo desactivee : les ATS anglo-saxons et la plupart des parseurs la
+     penalisent. Le slot reste present pour compatibilite mais n'est pas cible. */
+  .cv-photo {
+    display: none;
+  }
+
+  /* === SECTIONS === */
+  .section {
+    margin-bottom: 9px;
+  }
+
+  .section-title {
+    font-family: var(--font-family);
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--ink);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 2px;
+    margin-bottom: 5px;
+    line-height: 1.2;
+  }
+
+  /* === RESUME === */
+  .summary-text {
+    font-size: var(--font-size);
+    line-height: 1.45;
+    color: var(--ink-soft);
+    text-align: justify;
+  }
+
+  .summary-text strong {
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  a {
+    white-space: nowrap;
+  }
+
+  /* === COMPETENCES CLES ===
+     Pas de puces graphiques, pas de fond : une simple liste inline. Chaque
+     terme reste un token distinct pour l'extracteur. */
+  .competencies-grid {
+    display: block;
+    font-size: 9.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .competency-tag {
+    display: inline;
+    font-weight: 500;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  .competency-tag::after {
+    content: ", ";
+    white-space: normal;
+  }
+
+  .competency-tag:last-child::after {
+    content: "";
+  }
+
+  /* === EXPERIENCE === */
+  .job {
+    margin-bottom: 7px;
+  }
+
+  .job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 1px;
+  }
+
+  .job-company {
+    font-family: var(--font-family);
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .job-period {
+    font-size: 9.5px;
+    color: var(--ink-mute);
+    white-space: nowrap;
+  }
+
+  .job-role {
+    font-size: var(--font-size);
+    font-weight: 600;
+    font-style: italic;
+    color: var(--ink-soft);
+    margin-bottom: 2px;
+  }
+
+  .job-location {
+    font-size: 9px;
+    color: var(--ink-mute);
+  }
+
+  .job ul {
+    padding-left: 14px;
+    margin-top: 2px;
+  }
+
+  .job li {
+    font-size: 9.5px;
+    line-height: 1.4;
+    color: var(--ink-soft);
+    margin-bottom: 1px;
+  }
+
+  .job li strong {
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  /* === PROJETS === */
+  .project {
+    margin-bottom: 5px;
+  }
+
+  .project-title {
+    font-family: var(--font-family);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .project-badge {
+    font-size: 8.5px;
+    font-weight: 500;
+    color: var(--ink-mute);
+    margin-left: 5px;
+  }
+
+  .project-desc {
+    font-size: 9.5px;
+    color: var(--ink-soft);
+    margin-top: 1px;
+    line-height: 1.4;
+  }
+
+  .project-tech {
+    font-size: 9px;
+    color: var(--ink-mute);
+    margin-top: 1px;
+  }
+
+  /* === FORMATION === */
+  .edu-item {
+    margin-bottom: 4px;
+  }
+
+  .edu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .edu-title {
+    font-weight: 700;
+    font-size: var(--font-size);
+    color: var(--ink);
+  }
+
+  .edu-org {
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+
+  .edu-year {
+    font-size: 9.5px;
+    color: var(--ink-mute);
+    white-space: nowrap;
+  }
+
+  .edu-desc {
+    font-size: 9px;
+    color: var(--ink-mute);
+    margin-top: 1px;
+    line-height: 1.4;
+  }
+
+  /* === CERTIFICATIONS ===
+     Mise en page en lignes simples, sans tableau imbrique. */
+  .cert-table {
+    display: block;
+  }
+
+  .cert-item {
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .cert-item > * {
+    display: inline;
+  }
+
+  .cert-title {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .cert-org {
+    font-size: 9.5px;
+    color: var(--ink-soft);
+  }
+
+  /* Le partiel certifications emet un span vide quand l'organisme ou l'annee
+     manque : le separateur ne doit pas apparaitre dans ce cas. */
+  .cert-org::before {
+    content: " - ";
+  }
+
+  .cert-org:empty::before,
+  .cert-year:empty::before {
+    content: "";
+  }
+
+  .cert-year {
+    font-size: 9.5px;
+    color: var(--ink-mute);
+  }
+
+  .cert-year::before {
+    content: " ";
+  }
+
+  /* === COMPETENCES === */
+  .skills-grid {
+    display: block;
+  }
+
+  .skill-item {
+    display: block;
+    font-size: 9.5px;
+    line-height: 1.45;
+    color: var(--ink-soft);
+    margin-bottom: 1px;
+  }
+
+  .skill-category {
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 9.5px;
+  }
+
+  /* === IMPRESSION === */
+  @media print {
+    body {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* Gouttiere droite : le contenu aligne a droite (periodes, annees) peut
+       deborder d'environ 1px et se faire rogner par le clip d'impression. */
+    .page {
+      padding: 0 0.15in 0 0;
+    }
+  }
+
+  /* === SAUTS DE PAGE ===
+     Ce template vise une page. Les regles restent en place pour le cas ou le
+     contenu deborde malgre tout : on garde les unites atomiques entieres. */
+  .header,
+  .edu-item,
+  .cert-item,
+  .skill-item,
+  .project {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .section-title,
+  .job-company,
+  .job-role,
+  .job-location,
+  .project-title {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  {{PHOTO}}
+  <!-- EN-TETE -->
+  <div class="header">
+    <h1>{{NAME}}</h1>
+    <div class="header-gradient"></div>
+    <div class="contact-row">
+      <a href="tel:{{PHONE}}">{{PHONE}}</a>
+      <span class="separator">|</span>
+      <a href="mailto:{{EMAIL}}">{{EMAIL}}</a>
+      <span class="separator">|</span>
+      <a href="{{LINKEDIN_URL}}">{{LINKEDIN_DISPLAY}}</a>
+      <span class="separator">|</span>
+      <a href="{{PORTFOLIO_URL}}">{{PORTFOLIO_DISPLAY}}</a>
+      <span class="separator">|</span>
+      <span>{{LOCATION}}</span>
+    </div>
+  </div>
+
+  <!-- RESUME -->
+  <div class="section">
+    <div class="section-title">{{SECTION_SUMMARY}}</div>
+    <div class="summary-text">{{SUMMARY_TEXT}}</div>
+  </div>
+
+  <!-- COMPETENCES CLES -->
+  <div class="section">
+    <div class="section-title">{{SECTION_COMPETENCIES}}</div>
+    <div class="competencies-grid">
+      {{COMPETENCIES}}
+    </div>
+  </div>
+
+  <!-- EXPERIENCE -->
+  <div class="section">
+    <div class="section-title">{{SECTION_EXPERIENCE}}</div>
+    {{EXPERIENCE}}
+  </div>
+
+  <!-- PROJETS -->
+  <div class="section">
+    <div class="section-title">{{SECTION_PROJECTS}}</div>
+    {{PROJECTS}}
+  </div>
+
+  <!-- FORMATION -->
+  <div class="section">
+    <div class="section-title">{{SECTION_EDUCATION}}</div>
+    {{EDUCATION}}
+  </div>
+
+  <!-- CERTIFICATIONS -->
+  <div class="section">
+    <div class="section-title">{{SECTION_CERTIFICATIONS}}</div>
+    <div class="cert-table">{{CERTIFICATIONS}}</div>
+  </div>
+
+  <!-- COMPETENCES -->
+  <div class="section">
+    <div class="section-title">{{SECTION_SKILLS}}</div>
+    {{SKILLS}}
+  </div>
+
+</div>
+</body>
+</html>

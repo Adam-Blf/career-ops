@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Lettre de motivation - {{NAME}}</title>
+<!-- career-ops-template
+  name: ATS une page (noir et blanc)
+  description: Lettre de motivation sobre, grayscale strict, meme densite que le CV ATS, libelles en francais.
+-->
+<style>
+  /* ===================================================================
+     Lettre de motivation, pendant du template CV ATS.
+     Aucune couleur, police systeme, une page.
+     Le libelle de titre est en francais : c'est la difference de fond avec
+     cover-letter-template.html, dont l'intitule "Cover Letter" est en dur.
+     =================================================================== */
+  :root {
+    --font-family: "Liberation Sans", 'Helvetica Neue', Arial, 'DejaVu Sans', sans-serif;
+    --font-size: 10pt;
+    --ink: #000000;
+    --ink-soft: #333333;
+    --ink-mute: #555555;
+    /* Doit rester aligne sur PDF_PAGE_MARGIN de generate-pdf.mjs. */
+    --page-margin: 0.55in;
+  }
+  @page { margin: var(--page-margin); }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "clig" 0, "dlig" 0;
+  }
+
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    font-family: var(--font-family);
+    font-size: var(--font-size);
+    line-height: 1.42;
+    color: var(--ink-soft);
+    background: #ffffff;
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "clig" 0, "dlig" 0;
+  }
+
+  .name {
+    font-weight: 700;
+    font-size: 13pt;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    margin-bottom: 3pt;
+  }
+
+  .contact, .credentials {
+    font-size: 8.5pt;
+    color: var(--ink-mute);
+    line-height: 1.35;
+    margin-bottom: 2pt;
+  }
+
+  .contact a, .credentials a, .footnotes a {
+    color: var(--ink-mute);
+    text-decoration: none;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1pt solid var(--ink);
+    margin: 6pt 0 8pt;
+  }
+
+  .role-title {
+    font-weight: 700;
+    font-size: 10.5pt;
+    color: var(--ink);
+    margin-top: 8pt;
+    margin-bottom: 2pt;
+  }
+
+  .dateline {
+    font-size: 8.5pt;
+    color: var(--ink-mute);
+    margin-bottom: 10pt;
+  }
+
+  .greeting {
+    margin-bottom: 7pt;
+  }
+
+  p {
+    margin-bottom: 7pt;
+    text-align: justify;
+  }
+
+  /* Puces natives, pas de pseudo-element positionne.
+     Un ::before en position absolue sort du flux : Chromium le peint apres le
+     contenu qui suit, et l'extraction de texte du PDF (ce que lit un ATS)
+     restitue alors la liste a la fin du document, apres la formule de politesse.
+     Le glyphe injecte par content: ressortait en plus comme caractere de
+     remplacement. La puce native corrige les deux. */
+  .achievements {
+    list-style: disc;
+    margin-bottom: 4pt;
+    padding-left: 14pt;
+  }
+
+  .achievements li {
+    margin-bottom: 4pt;
+  }
+
+  .language-closing {
+    font-style: italic;
+    margin-top: 4pt;
+    margin-bottom: 7pt;
+  }
+
+  .footnotes {
+    margin-top: 9pt;
+    padding-top: 4pt;
+    border-top: 0.5pt solid var(--ink-mute);
+  }
+
+  .footnotes p {
+    font-size: 7.5pt;
+    color: var(--ink-mute);
+    line-height: 1.3;
+    margin-bottom: 3pt;
+  }
+</style>
+</head>
+<body>
+  <div class="name">{{NAME}}</div>
+  <div class="contact">{{CONTACT_LINE}}</div>
+  {{CREDENTIALS_BLOCK}}
+  <hr class="divider">
+
+  <div class="role-title">Lettre de motivation : {{ROLE_TITLE}}</div>
+  <div class="dateline">{{DATELINE}}</div>
+
+  {{GREETING_BLOCK}}
+  <p>{{OPENING}}</p>
+  <p>{{PROFILE_INTRO}}</p>
+
+  {{ACHIEVEMENTS_BLOCK}}
+
+  {{PROBLEMS_BLOCK}}
+  {{CLOSING_BLOCK}}
+  {{LANGUAGE_CLOSING_BLOCK}}
+  {{FOOTNOTES_BLOCK}}
+</body>
+</html>
